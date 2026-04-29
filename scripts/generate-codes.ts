@@ -18,7 +18,8 @@ type RedeemCodeRow = {
 };
 
 const codeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const codePrefix = "SA-2026";
+const codePrefix = "LH";
+const codeSegmentLengths = [4, 4];
 const defaultInternalTestCount = 20;
 const defaultSaleCount = 100;
 const maxAttempts = 5000;
@@ -56,13 +57,17 @@ function loadEnvFile(filename: string) {
 }
 
 function createCode() {
-  let suffix = "";
+  const segments = codeSegmentLengths.map((segmentLength) => {
+    let segment = "";
 
-  for (let index = 0; index < 4; index += 1) {
-    suffix += codeAlphabet[randomInt(codeAlphabet.length)];
-  }
+    for (let index = 0; index < segmentLength; index += 1) {
+      segment += codeAlphabet[randomInt(codeAlphabet.length)];
+    }
 
-  return `${codePrefix}-${suffix}`;
+    return segment;
+  });
+
+  return [codePrefix, ...segments].join("-");
 }
 
 async function insertRedeemCodes(rows: RedeemCodeInsert[]) {

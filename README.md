@@ -89,7 +89,9 @@ alter table public.events enable row level security;
 
 - 20 个 `type=internal_test`
 - 100 个 `type=sale`
-- 格式：`SA-2026-XXXX`
+- 格式：`LH-XXXX-XXXX`
+
+兑换码使用 8 位随机段，避免出现年份、批次或顺序感过强的规律。
 
 运行：
 
