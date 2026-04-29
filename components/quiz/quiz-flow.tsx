@@ -11,6 +11,7 @@ import {
   StarProgress
 } from "@/components/ui";
 import { questions, type QuestionOptionId } from "@/data/questions";
+import { getAdaptiveLead, type AnswerMap } from "@/lib/adaptivePath";
 import { getChapterTheme } from "@/lib/chapterTheme";
 import { trackClientEvent } from "@/lib/clientAnalytics";
 
@@ -25,7 +26,7 @@ function getStoredAnswers() {
   try {
     return JSON.parse(
       sessionStorage.getItem("soul-atlas-answers") ?? "{}"
-    ) as Record<string, QuestionOptionId>;
+    ) as AnswerMap;
   } catch {
     return {};
   }
@@ -37,6 +38,7 @@ export function QuizFlow({ initialQuestionIndex = 0 }: QuizFlowProps) {
   const timerRef = useRef<number | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] =
     useState(initialQuestionIndex);
+  const [answers, setAnswers] = useState<AnswerMap>({});
   const [selectedOptionId, setSelectedOptionId] =
     useState<QuestionOptionId | null>(null);
 
@@ -46,12 +48,20 @@ export function QuizFlow({ initialQuestionIndex = 0 }: QuizFlowProps) {
     () => getChapterTheme(currentQuestionIndex),
     [currentQuestionIndex]
   );
+  const adaptiveLead = useMemo(
+    () => getAdaptiveLead(questionNumber, answers),
+    [answers, questionNumber]
+  );
   const isAnswering = selectedOptionId !== null;
 
   useEffect(() => {
     if (initialQuestionIndex === 0) {
       sessionStorage.removeItem("soul-atlas-answers");
+      setAnswers({});
+      return;
     }
+
+    setAnswers(getStoredAnswers());
   }, [initialQuestionIndex]);
 
   useEffect(() => {
@@ -80,13 +90,12 @@ export function QuizFlow({ initialQuestionIndex = 0 }: QuizFlowProps) {
       }
 
       setSelectedOptionId(optionId);
-      sessionStorage.setItem(
-        "soul-atlas-answers",
-        JSON.stringify({
-          ...getStoredAnswers(),
-          [questionNumber]: optionId
-        })
-      );
+      const nextAnswers = {
+        ...getStoredAnswers(),
+        [questionNumber]: optionId
+      };
+      sessionStorage.setItem("soul-atlas-answers", JSON.stringify(nextAnswers));
+      setAnswers(nextAnswers);
       trackClientEvent("question_answered", {
         payload: {
           chapter: question.chapter,
@@ -157,6 +166,9 @@ export function QuizFlow({ initialQuestionIndex = 0 }: QuizFlowProps) {
             />
 
             <div className="quiz-scene">
+              {adaptiveLead ? (
+                <p className="quiz-scene__lead">{adaptiveLead}</p>
+              ) : null}
               <p>{question.scene}</p>
             </div>
 

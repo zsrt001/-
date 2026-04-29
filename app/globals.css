@@ -1117,6 +1117,16 @@ a {
     text-wrap: pretty;
   }
 
+  .quiz-scene .quiz-scene__lead {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(196, 163, 93, 0.16);
+    color: rgba(239, 227, 194, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    text-shadow: 0 2px 12px rgba(6, 5, 4, 0.78);
+  }
+
   .quiz-options {
     display: grid;
     gap: 12px;
